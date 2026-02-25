@@ -16,6 +16,10 @@ const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 const surplusRoutes = require("./routes/surplusRoutes");
 app.use("/api/surplus", surplusRoutes);
+const ngoRoutes = require("./routes/ngoRoutes");
+app.use("/api/ngo", ngoRoutes);
+const allocationRoutes = require("./routes/allocationRoutes");
+app.use("/api/allocation", allocationRoutes);
 
 // MongoDB Connection
 mongoose
