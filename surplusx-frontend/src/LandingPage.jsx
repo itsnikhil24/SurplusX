@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom'; // ← Add this
+import { useNavigate } from 'react-router-dom';
 import "../src/styles/LandingPage.css";
 import img1 from "../src/photos/img1.png";
 import img2 from "../src/photos/img2.png";
@@ -8,8 +8,11 @@ import img4 from "../src/photos/img4.png";
 import img5 from "../src/photos/img5.png";
 import img6 from "../src/photos/img6.png";
 
+// Import icons from lucide-react
+import { Cpu, ShoppingCart, Heart, BarChart3 } from 'lucide-react';
+
 const LandingPage = ({ handleLoginOpen }) => {
-  const navigate = useNavigate(); // ← Initialize navigate
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
@@ -27,12 +30,26 @@ const LandingPage = ({ handleLoginOpen }) => {
   }, []);
 
   const features = [
-    { icon: "🤖", title: "AI Smart Split", desc: "Decides what to sell vs. donate based on freshness, demand & need." },
-    { icon: "🛒", title: "Marketplace", desc: "Sell discounted surplus food to conscious consumers — zero waste, maximum value." },
-    { icon: "💝", title: "NGO Network", desc: "Route donations to verified NGOs with real-time capacity tracking." },
-    { icon: "🌍", title: "Hunger Mapping", desc: "Live heatmaps of food insecurity zones to prioritize donations." },
-    { icon: "📈", title: "Impact Analytics", desc: "Track meals saved, CO₂ reduced, and communities served." },
-    { icon: "🔮", title: "Predictive Insights", desc: "Forecast surplus patterns to prevent waste before it happens." },
+    {
+      icon: <Cpu size={36} color="#1f7a49" />,
+      title: "AI Smart Split",
+      desc: "Decides what to sell vs. donate based on freshness, demand & need."
+    },
+    {
+      icon: <ShoppingCart size={36} color="#f58220" />,
+      title: "Marketplace",
+      desc: "Sell discounted surplus food to conscious consumers — zero waste, maximum value."
+    },
+    {
+      icon: <Heart size={36} color="#edc22b" />,
+      title: "NGO Network",
+      desc: "Route donations to verified NGOs with real-time capacity tracking."
+    },
+    {
+      icon: <BarChart3 size={36} color="#1f7a49" />,
+      title: "Impact Analytics",
+      desc: "Track meals saved, CO₂ reduced, and communities served."
+    },
   ];
 
   return (
@@ -51,7 +68,7 @@ const LandingPage = ({ handleLoginOpen }) => {
         <div className="nav-right">
           <button
             className="btn-primary"
-            onClick={() => navigate("/login")} // ← Navigate to login
+            onClick={() => navigate("/login")}
           >
             Get Started
           </button>
@@ -71,7 +88,7 @@ const LandingPage = ({ handleLoginOpen }) => {
           <div className="hero-buttons">
             <button
               className="btn-primary"
-              onClick={() => navigate("/login")} // ← Navigate to login
+              onClick={() => navigate("/login")}
             >
               Launch Platform
             </button>
@@ -109,7 +126,7 @@ const LandingPage = ({ handleLoginOpen }) => {
       <section className="features-section" id="features">
         <div className="section-container">
           <h2 className="section-title">Powered by Intelligence</h2>
-          <p className="section-subtitle">Six integrated modules working together</p>
+          <p className="section-subtitle">Four integrated modules working together</p>
           <div className="features-grid">
             {features.map((f, idx) => (
               <div key={idx} className="feature-card">
@@ -123,33 +140,36 @@ const LandingPage = ({ handleLoginOpen }) => {
       </section>
 
       {/* How It Works */}
-      <section className="how-section">
-  <h2>How It Works</h2>
-  <div className="features-grid">
-    <div className="feature-card">
-      <div className="step-number">1</div>
-      <div className="step-title">Sign Up</div>
-      <div className="step-desc">Create your account as a restaurant, NGO, or admin.</div>
-    </div>
-    <div className="feature-card">
-      <div className="step-number">2</div>
-      <div className="step-title">Post Surplus</div>
-      <div className="step-desc">Restaurants post their surplus food.</div>
-    </div>
-    <div className="feature-card">
-      <div className="step-number">3</div>
-      <div className="step-title">NGO Picks</div>
-      <div className="step-desc">NGOs select and collect the food.</div>
-    </div>
-    <div className="feature-card">
-      <div className="step-number">4</div>
-      <div className="step-title">Serve & Impact</div>
-      <div className="step-desc">Food reaches those in need efficiently.</div>
-    </div>
-  </div>
-</section>
+      <section className="how-section" id="how">
+        <h2>How It Works</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="step-number">1</div>
+            <div className="step-title">Sign Up</div>
+            <div className="step-desc">Create your account as a restaurant, NGO, or admin.</div>
+          </div>
+          <div className="feature-card">
+            <div className="step-number">2</div>
+            <div className="step-title">Post Surplus</div>
+            <div className="step-desc">Restaurants post their surplus food.</div>
+          </div>
+          <div className="feature-card">
+            <div className="step-number">3</div>
+            <div className="step-title">NGO Picks</div>
+            <div className="step-desc">NGOs select and collect the food.</div>
+          </div>
+          <div className="feature-card">
+            <div className="step-number">4</div>
+            <div className="step-title">Serve & Impact</div>
+            <div className="step-desc">Food reaches those in need efficiently.</div>
+          </div>
+        </div>
+      </section>
 
-
+   {/* Footer */}
+      <footer className="landing-footer">
+        <p>© 2026 SurplusX — Social Impact Platform developed by Nikhil Sharma and Ambika Kashyap</p>
+      </footer>
     </div>
   );
 };

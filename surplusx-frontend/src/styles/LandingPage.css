@@ -48,12 +48,26 @@ body, html {
 
 .nav-right .btn-primary {
   font-weight: 700;
+  background: #22C55E;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  transition: background 0.3s, opacity 0.3s;
 }
+
+.nav-right .btn-primary:hover {
+  background: #4ADE80;
+  opacity: 0.9;
+}
+
 /* Hero Section */
 .hero-section {
   position: relative;
   width: 100%;
-  height: 80vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,10 +75,9 @@ body, html {
   overflow: hidden;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../photos/hero-bg.jpg') center/cover no-repeat;
 }
-
 .hero-container {
   position: relative;
-  z-index: 2;
+  z-index: 10; /* Make sure subtitle & buttons appear above the image */
   text-align: center;
   max-width: 1200px;
   padding: 0 20px;
@@ -85,7 +98,7 @@ body, html {
 .hero-title {
   font-size: 5rem;
   font-weight: 900;
-  margin-bottom: 16px;
+  margin-bottom: 100px;
   color: #fff;
 }
 
@@ -99,8 +112,13 @@ body, html {
   font-size: 1.3rem;
   margin-bottom: 32px;
   line-height: 1.6;
+  color: #fffefe; /* Fully dark black */
+  position: relative; /* Keep above background */
+  z-index: 11;
 }
 
+
+/* Hero Buttons Updated */
 .hero-buttons .btn-primary,
 .hero-buttons .btn-secondary {
   margin: 0 10px;
@@ -108,11 +126,21 @@ body, html {
   font-size: 18px;
   border-radius: 999px;
   cursor: pointer;
+  opacity: 1; /* Fully visible */
+  transition: opacity 0.3s, transform 0.3s;
+  position: relative; /* Keep above background */
+  z-index: 11;
+}
+
+.hero-buttons .btn-primary:hover,
+.hero-buttons .btn-secondary:hover {
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 .hero-buttons .btn-primary {
-  background: #ff8a00;
-  color: #fff;
+  background: #ff9317e3;
+  color: #000;
   border: none;
 }
 
@@ -127,39 +155,27 @@ body, html {
    ========================= */
 .hero-floating-images {
   position: absolute;
-  top: 50%; /* Upper half */
+  top: 50%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 5px;
   z-index: 1;
-  opacity: 0.45; /* Behind text */
+  opacity: 0.45;
 }
 
-/* Base styles for floating images */
 .floating-img {
   width: 300px;
-  height: 700px;
+  height: 400px;
   object-fit: cover;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
   transition: transform 0.3s;
 }
 
-/* Floating animation: alternate up and down */
-@keyframes floatUpDown {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0); }
-}
+@keyframes floatUpDown { 0%{transform:translateY(0);}50%{transform:translateY(-20px);}100%{transform:translateY(0);} }
+@keyframes floatDownUp { 0%{transform:translateY(0);}50%{transform:translateY(20px);}100%{transform:translateY(0);} }
 
-@keyframes floatDownUp {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(20px); }
-  100% { transform: translateY(0); }
-}
-
-/* Assign alternating animations */
 .float-1 { animation: floatUpDown 6s ease-in-out infinite; }
 .float-2 { animation: floatDownUp 7s ease-in-out infinite; }
 .float-3 { animation: floatUpDown 6.5s ease-in-out infinite; }
@@ -167,7 +183,6 @@ body, html {
 .float-5 { animation: floatUpDown 8s ease-in-out infinite; }
 .float-6 { animation: floatDownUp 8.5s ease-in-out infinite; }
 
-/* Floating Notifications */
 .floating-notification {
   position: absolute;
   background: rgba(255, 255, 255, 0.2);
@@ -183,22 +198,22 @@ body, html {
   animation: floatNotification 4s ease-in-out infinite;
 }
 
-/* Slight float animation for notifications */
 @keyframes floatNotification {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(6px, -6px); }
-  50% { transform: translate(-6px, 6px); }
-  75% { transform: translate(6px, 6px); }
-  100% { transform: translate(0, 0); }
+  0%{transform:translate(0,0);}
+  25%{transform:translate(6px,-6px);}
+  50%{transform:translate(-6px,6px);}
+  75%{transform:translate(6px,6px);}
+  100%{transform:translate(0,0);}
 }
+
 /* ===== Features Section ===== */
 .features-section { 
-  padding: 15rem 5% 10rem 5%; /* top padding for spacing */
+  padding: 10rem 5% 10rem 5%;
   text-align: center; 
 }
 
 .section-title {
-  font-size: 2.5rem; 
+  font-size: 3rem; 
   font-weight: 900; 
   margin-bottom: 0.5rem; 
   background: linear-gradient(135deg, #22C55E, #4ADE80);
@@ -214,7 +229,7 @@ body, html {
 
 .features-grid { 
   display: grid; 
-  grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+  grid-template-columns: repeat(4, 1fr); 
   gap: 2rem; 
   justify-items: center; 
 }
@@ -253,23 +268,9 @@ body, html {
   text-align: center;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 1024px) {
-  .features-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 per row on tablets */
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .features-grid {
-    grid-template-columns: 1fr; /* 1 per row on mobile */
-    gap: 1.5rem;
-  }
-}
-/* ===== How It Works Section (Cards Layout) ===== */
+/* ===== How It Works Section ===== */
 .how-section { 
-  padding: 8rem 5%; 
+  padding: 2rem 5%; 
   text-align: center; 
   position: relative;
   background: #0A0F08;
@@ -282,7 +283,7 @@ body, html {
   margin-bottom: 3rem;
 }
 
-.features-grid {
+.how-section .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
@@ -290,8 +291,7 @@ body, html {
   margin: 0 auto;
 }
 
-/* Individual cards */
-.feature-card {
+.how-section .feature-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
@@ -302,12 +302,11 @@ body, html {
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.feature-card:hover {
+.how-section .feature-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Step circle inside card */
 .step-number { 
   width: 60px;
   height: 60px;
@@ -322,14 +321,12 @@ body, html {
   margin-bottom: 1.5rem;
 }
 
-/* Step Titles inside card */
 .step-title { 
   font-size: 1rem; 
   color: rgba(255,255,255,0.9); 
   text-align: center;
 }
 
-/* Optional step description */
 .step-desc {
   font-size: 0.9rem;
   color: rgba(255,255,255,0.6);
@@ -337,9 +334,28 @@ body, html {
   margin-top: 0.5rem;
 }
 
-/* Responsive adjustments */
+/* ===== Footer ===== */
+.landing-footer {
+  width: 100%;
+  padding: 1.5rem 5%;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.9rem;
+  position: relative;
+  bottom: 0;
+  margin-top: 3rem;
+}
+
+.landing-footer p {
+  margin: 0;
+}
+
+/* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .features-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .how-section .features-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
 }
 
 @media (max-width: 768px) {
