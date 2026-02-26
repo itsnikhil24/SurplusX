@@ -5,6 +5,7 @@ import LoginPage from '../src/LoginPage.jsx'
 import Dashboard from '../src/Dashboard.jsx'
 import Upload from '../src/Upload.jsx'
 import Marketplace from '../src/Marketplace.jsx'
+import Impact from '../src/Impact.jsx'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
      <Route path="/dashboard" element={<Dashboard />} />
        <Route path="/uploadsurplus" element={<Upload />} />
            <Route path="/marketplace" element={<Marketplace />} />
+           <Route path="/impactdashboard" element={<Impact/>} />
     </Routes>
   )
 }

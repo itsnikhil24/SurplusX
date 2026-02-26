@@ -52,40 +52,41 @@ export default function Dashboard() {
         </div>
 
         <nav className="sidebar-menu">
-          <a className="active">
+          <a
+            className="active"
+            onClick={() => (window.location.href = "/dashboard")}
+          >
             <LayoutDashboard size={20} />
             {sidebarOpen && <span>Dashboard</span>}
           </a>
 
           <a onClick={() => (window.location.href = "/uploadsurplus")}>
-    <Upload size={20} />
-    {sidebarOpen && <span>Upload Surplus</span>}
-  </a>
+            <Upload size={20} />
+            {sidebarOpen && <span>Upload Surplus</span>}
+          </a>
 
-  <a onClick={() => (window.location.href = "/marketplace")}>
-    <Store size={20} />
-    {sidebarOpen && <span>Marketplace</span>}
-  </a>
-          <a>
+          <a onClick={() => (window.location.href = "/marketplace")}>
+            <Store size={20} />
+            {sidebarOpen && <span>Marketplace</span>}
+          </a>
+
+          <a onClick={() => (window.location.href = "/ngoallocation")}>
             <Users size={20} />
             {sidebarOpen && <span>NGO Allocation</span>}
           </a>
 
-          <a>
+          <a onClick={() => (window.location.href = "/impactdashboard")}>
             <BarChart3 size={20} />
             {sidebarOpen && <span>Impact Dashboard</span>}
           </a>
 
-          <a>
-            <Map size={20} />
-            {sidebarOpen && <span>Hunger Map</span>}
-          </a>
+         
         </nav>
 
-        <div className="logout">
-          <LogOut size={20} />
-          {sidebarOpen && <span>Logout</span>}
-        </div>
+      <div className="logout" onClick={() => (window.location.href = "/")}>
+  <LogOut size={20} />
+  {sidebarOpen && <span>Logout</span>}
+</div>
       </aside>
 
       {/* ===== Main ===== */}
@@ -137,9 +138,24 @@ export default function Dashboard() {
         <div className="bottom-grid">
           <div className="quick-card glass">
             <h3>Quick Actions</h3>
-            <button className="primary-btn">Upload Surplus →</button>
-            <button className="secondary-btn">View Marketplace →</button>
-            <button className="secondary-btn">Impact Report →</button>
+            <button
+              className="primary-btn"
+              onClick={() => (window.location.href = "/uploadsurplus")}
+            >
+              Upload Surplus →
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={() => (window.location.href = "/marketplace")}
+            >
+              View Marketplace →
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={() => (window.location.href = "/impactdashboard")}
+            >
+              Impact Report →
+            </button>
           </div>
 
           <div className="recent-card glass">

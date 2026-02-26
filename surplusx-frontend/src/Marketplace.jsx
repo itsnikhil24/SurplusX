@@ -101,16 +101,14 @@ export default function Marketplace() {
             {sidebarOpen && <span>Impact Dashboard</span>}
           </a>
 
-          <a>
-            <Map size={20} />
-            {sidebarOpen && <span>Hunger Map</span>}
-          </a>
+      
         </nav>
 
-        <div className="logout">
-          <LogOut size={20} />
-          {sidebarOpen && <span>Logout</span>}
-        </div>
+     
+           <div className="logout" onClick={() => (window.location.href = "/")}>
+       <LogOut size={20} />
+       {sidebarOpen && <span>Logout</span>}
+     </div>
       </aside>
 
       {/* ===== Main ===== */}

@@ -41,12 +41,11 @@
 .sidebar.closed {
   width: 80px;
 }
-
-.sidebar.closed .sidebar-menu a, 
-.sidebar.closed .logout,
-.sidebar.closed .sidebar-header {
-  justify-content: center;
-  padding: 12px 0;
+/* ===== Sidebar Logo Alignment Fix ===== */
+.sidebar.closed .logo {
+  justify-content: center;   /* Center the icon horizontally */
+  width: 100%;
+  text-align: center;        /* Ensure text/icon is perfectly centered */
 }
 
 .sidebar.closed span {
