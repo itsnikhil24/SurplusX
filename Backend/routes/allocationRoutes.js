@@ -1,18 +1,14 @@
 const express = require("express");
+
 const router = express.Router();
 
-const { smartAllocate } = require("../controllers/allocationController");
+const {
+  smartAllocateFood
+} = require("../controllers/allocationController");
 
-const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
+// AI Allocation Route
 
-// Smart Allocation Route
-router.post(
-    "/smart-allocate",
-    protect,
-    authorizeRoles("restaurant"),
-    smartAllocate
-);
-
+router.post("/smart-allocate", smartAllocateFood);
 
 module.exports = router;

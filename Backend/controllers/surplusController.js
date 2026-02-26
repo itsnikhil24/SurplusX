@@ -25,30 +25,50 @@ const calculateScore = (quantity, expiryDate, pricePerUnit) => {
 // -----------------------------
 exports.uploadSurplus = async (req, res) => {
     try {
-        const { itemName, quantity, unit, expiryDate, pricePerUnit } = req.body;
+
+        const {
+            itemName,
+            quantity,
+            unit,
+            expiryDate,
+            pricePerUnit,
+            restaurantLocation,
+            coordinates
+        } = req.body;
 
         if (!itemName || !quantity || !expiryDate || !pricePerUnit) {
-            return res.status(400).json({ message: "Please provide all required fields" });
+            return res.status(400).json({
+                message: "Please provide all required fields"
+            });
         }
 
-        // Calculate score
         const score = calculateScore(quantity, expiryDate, pricePerUnit);
 
-        // Final decision directly from AI suggestion
         const decision = score >= 7 ? "sell" : "donate";
 
-        // Create surplus item
         const surplus = await SurplusItem.create({
+
             restaurantId: req.user._id,
+
             itemName,
             quantity,
             unit: unit || "kg",
             expiryDate,
             pricePerUnit,
-            suggestedDecision: decision,  // can keep for reference
-            decision,                     // final decision
-            status: "confirmed",          // auto confirmed
-            currentState: "inStock"       // initial stock state
+
+            suggestedDecision: decision,
+            decision,
+
+            status: "confirmed",
+            currentState: "inStock",
+
+            restaurantLocation,
+
+            coordinates: {
+                latitude: coordinates?.latitude,
+                longitude: coordinates?.longitude
+            }
+
         });
 
         res.status(201).json({
@@ -58,8 +78,12 @@ exports.uploadSurplus = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server Error", error: error.message });
+
+        res.status(500).json({
+            message: "Server Error",
+            error: error.message
+        });
+
     }
 };
 
@@ -96,4 +120,40 @@ exports.updateStockState = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Server Error", error: error.message });
     }
+};
+
+/*
+GET RESTAURANT SURPLUS ITEMS
+GET /api/surplus/my-items
+Private (Restaurant)
+*/
+
+exports.getMySurplus = async (req, res) => {
+
+  try {
+
+    const surplusItems = await SurplusItem.find({
+
+      restaurantId: req.user._id,
+      decision: "donate"
+
+    }).sort({ createdAt: -1 });
+
+
+    res.status(200).json({
+
+      success: true,
+      count: surplusItems.length,
+      data: surplusItems
+
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message
+    });
+
+  }
+
 };

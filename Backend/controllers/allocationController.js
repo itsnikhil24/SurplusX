@@ -1,118 +1,209 @@
+const NGORequest = require("../models/NgoRequest");
 const SurplusItem = require("../models/SurplusItem");
-const NgoRequest = require("../models/NgoRequest");
-const User = require("../models/User");
+
+const smartAllocateFood = async (req, res) => {
+  try {
+
+    const { surplusId } = req.body;
+
+    if (!surplusId) {
+      return res.status(400).json({
+        message: "surplusId is required"
+      });
+    }
+
+    // Get one donation item
+    const donation = await SurplusItem.findById(surplusId);
+
+    if (!donation) {
+      return res.status(404).json({
+        message: "Surplus item not found"
+      });
+    }
+
+    if (donation.decision !== "donate") {
+      return res.status(400).json({
+        message: "This item is not marked for donation"
+      });
+    }
+
+    if (donation.allocationStatus !== "unassigned") {
+      return res.status(400).json({
+        message: "Item already allocated"
+      });
+    }
+
+    const ngoRequests = await NGORequest.find({
+      status: "pending",
+      isActive: true
+    });
+
+    if (!ngoRequests.length) {
+      return res.status(400).json({
+        message: "No NGO requests available"
+      });
+    }
+
+    let bestNGO = null;
+    let bestScore = -1;
+
+    // Distance Formula
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+
+      const R = 6371;
+
+      const dLat = (lat2 - lat1) * Math.PI/180;
+      const dLon = (lon2 - lon1) * Math.PI/180;
+
+      const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1*Math.PI/180) *
+        Math.cos(lat2*Math.PI/180) *
+        Math.sin(dLon/2) *
+        Math.sin(dLon/2);
+
+      const c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+
+      return R * c;
+    };
 
 
-// Smart Allocation
-exports.smartAllocate = async (req, res) => {
+    for (let ngo of ngoRequests) {
 
-    try {
+      const freeCapacity =
+        ngo.totalCapacity - ngo.currentLoad;
 
-        const { surplusId } = req.body;
+      if (freeCapacity <= 0) continue;
 
-        // Get surplus item
-        const surplus = await SurplusItem.findById(surplusId)
-            .populate("restaurantId");
-
-        if (!surplus) {
-            return res.status(404).json({
-                message: "Surplus not found"
-            });
-        }
-
-        if (surplus.currentState !== "inStock") {
-            return res.status(400).json({
-                message: "Item already used"
-            });
-        }
+      if (
+        !donation.coordinates ||
+        !ngo.coordinates
+      ) continue;
 
 
-        // Get all pending NGO requests
-        const ngoRequests = await NgoRequest.find({
-            status: "pending"
-        }).populate("ngo");
+      const distance = calculateDistance(
+
+        donation.coordinates.latitude,
+        donation.coordinates.longitude,
+
+        ngo.coordinates.latitude,
+        ngo.coordinates.longitude
+
+      );
+
+      const distanceScore =
+        Math.max(0, 100 - distance);
 
 
-        if (ngoRequests.length === 0) {
-            return res.status(404).json({
-                message: "No NGO requests found"
-            });
-        }
+      const hoursLeft =
+        (new Date(ngo.requiredDate) - new Date())
+        / 3600000;
+
+      let urgencyScore = 0;
+
+      if (hoursLeft < 24) urgencyScore = 100;
+      else if (hoursLeft < 72) urgencyScore = 70;
+      else urgencyScore = 40;
 
 
-        let bestNgo = null;
-        let bestScore = 0;
+      const capacityScore =
+        (freeCapacity / ngo.totalCapacity) * 100;
 
 
-        ngoRequests.forEach(request => {
+      let foodScore = 20;
 
-            // NEED SCORE
-            const needScore = request.quantity / surplus.quantity;
+      if (ngo.foodType === "Both")
+        foodScore = 50;
 
-
-            // DISTANCE SCORE
-            let distanceScore = 0.5;
-
-            if (
-                request.location.toLowerCase() ===
-                surplus.restaurantId.location.toLowerCase()
-            ) {
-                distanceScore = 1;
-            }
+      else if (
+        donation.itemName
+        .toLowerCase()
+        .includes("veg") &&
+        ngo.foodType === "Veg"
+      )
+        foodScore = 50;
 
 
-            // FINAL SCORE
-            const score =
-                needScore * 0.6 +
-                distanceScore * 0.4;
+      const expiryHours =
+        (new Date(donation.expiryDate) - new Date())
+        / 3600000;
+
+      let expiryScore = 0;
+
+      if (expiryHours < 6)
+        expiryScore = 100;
+      else if (expiryHours < 24)
+        expiryScore = 70;
+      else
+        expiryScore = 40;
 
 
-            if (score > bestScore) {
-                bestScore = score;
-                bestNgo = request;
-            }
+      const totalScore =
 
-        });
-
-
-        if (!bestNgo) {
-            return res.status(404).json({
-                message: "No suitable NGO found"
-            });
-        }
+        (distanceScore * 0.3) +
+        (urgencyScore * 0.25) +
+        (capacityScore * 0.2) +
+        (foodScore * 0.1) +
+        (expiryScore * 0.15);
 
 
-        // Update Surplus
-        surplus.currentState = "donated";
-        await surplus.save();
+      if (totalScore > bestScore) {
 
+        bestScore = totalScore;
 
-        // Update NGO Request
-        bestNgo.status = "fulfilled";
-        await bestNgo.save();
+        bestNGO = ngo;
 
-
-        res.status(200).json({
-
-            message: "Smart Allocation Successful",
-
-            allocatedNgo: bestNgo.ngo.name,
-
-            location: bestNgo.location,
-
-            quantity: bestNgo.quantity,
-
-            surplusItem: surplus.itemName
-
-        });
-
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
+      }
 
     }
 
+
+    if (!bestNGO) {
+      return res.status(400).json({
+        message: "No suitable NGO found"
+      });
+    }
+
+
+    donation.assignedNgo = bestNGO._id;
+
+    donation.allocationStatus = "assigned";
+
+    await donation.save();
+
+
+    bestNGO.currentLoad += donation.quantity;
+
+    if (bestNGO.currentLoad >= bestNGO.totalCapacity)
+      bestNGO.status = "fulfilled";
+
+    await bestNGO.save();
+
+
+    res.json({
+
+      message: "Smart Allocation Completed",
+
+      surplusId: donation._id,
+
+      ngoId: bestNGO._id,
+
+      ngoName: bestNGO.ngoName,
+
+      score: Math.round(bestScore)
+
+    });
+
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message
+    });
+
+  }
+};
+
+module.exports = {
+  smartAllocateFood
 };

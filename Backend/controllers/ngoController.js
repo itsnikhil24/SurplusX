@@ -1,6 +1,5 @@
 const NgoRequest = require("../models/NgoRequest");
 
-
 /*
 CREATE NGO REQUEST
 POST /api/ngo/request
@@ -12,17 +11,27 @@ exports.createNgoRequest = async (req, res) => {
   try {
 
     const {
+      ngoName,
       foodType,
       foodCategory,
       quantity,
       location,
+      coordinates,
       requiredDate,
-      description
+      description,
+      totalCapacity
     } = req.body;
 
 
-    // Validation
-    if (!foodType || !foodCategory || !quantity || !location || !requiredDate) {
+    if (
+      !ngoName ||
+      !foodType ||
+      !foodCategory ||
+      !quantity ||
+      !location ||
+      !requiredDate ||
+      !totalCapacity
+    ) {
       return res.status(400).json({
         message: "Please fill all required fields"
       });
@@ -31,24 +40,72 @@ exports.createNgoRequest = async (req, res) => {
 
     const request = await NgoRequest.create({
 
-      ngo: req.user._id, // From token
+      ngo: req.user._id,
 
-      foodType,
-      foodCategory,
-      quantity,
-      location,
-      requiredDate,
-      description
+      ngoName: ngoName,
+
+      foodType: foodType,
+
+      foodCategory: foodCategory,
+
+      quantity: quantity,
+
+      location: location,
+
+      coordinates: coordinates,
+
+      requiredDate: requiredDate,
+
+      description: description,
+
+      totalCapacity: totalCapacity,
+
+      currentLoad: 0
 
     });
 
 
     res.status(201).json({
+
       success: true,
       message: "NGO Request Created Successfully",
       data: request
+
     });
 
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message
+    });
+
+  }
+
+};
+
+/*
+GET ALL NGO REQUESTS
+GET /api/ngo/requests
+Private (Restaurant)
+*/
+
+exports.getNgoRequests = async (req, res) => {
+
+  try {
+
+    const requests = await NgoRequest
+      .find({ status: "pending" })
+      .populate("ngo", "name email");
+
+
+    res.status(200).json({
+
+      success: true,
+      count: requests.length,
+      data: requests
+
+    });
 
   } catch (error) {
 

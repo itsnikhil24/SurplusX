@@ -4,6 +4,7 @@ import LandingPage from '../src/LandingPage.jsx'
 import LoginPage from '../src/LoginPage.jsx'
 import Dashboard from '../src/Dashboard.jsx'
 import Upload from '../src/Upload.jsx'
+import NGOAllocation from './NGOAllocation.jsx'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
      <Route path="/dashboard" element={<Dashboard />} />
        <Route path="/uploadsurplus" element={<Upload />} />
+       <Route path="/ngo-allocation" element={<NGOAllocation />} />
     </Routes>
   )
 }

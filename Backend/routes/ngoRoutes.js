@@ -1,21 +1,30 @@
 const express = require("express");
+
 const router = express.Router();
 
-const { createNgoRequest } = require("../controllers/ngoController");
+const {
+  createNgoRequest,
+  getNgoRequests
+} = require("../controllers/ngoController");
 
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
 
-/*
-CREATE NGO REQUEST
-Only NGO can create
-*/
-
+// NGO create request
 router.post(
   "/request",
   protect,
   authorizeRoles("ngo"),
   createNgoRequest
+);
+
+
+// Restaurant fetch NGO requests
+router.get(
+  "/requests",
+  protect,
+  authorizeRoles("restaurant"),
+  getNgoRequests
 );
 
 
