@@ -1,5 +1,8 @@
 // controllers/surplusController.js
 const SurplusItem = require("../models/SurplusItem");
+// const SurplusItem = require("../models/SurplusItem");
+const User = require("../models/User"); // <-- Add this line
+const NgoRequest = require("../models/NgoRequest"); // If this is in the same file
 
 // Helper to calculate weighted score
 const calculateScore = (quantity, expiryDate, pricePerUnit) => {
@@ -164,4 +167,56 @@ exports.getMySurplus = async (req, res) => {
 
   }
 
+};
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // 1. Total Meals Saved (Sum of all quantity in SurplusItem)
+    const mealsSavedAgg = await SurplusItem.aggregate([
+      { $group: { _id: null, total: { $sum: "$quantity" } } }
+    ]);
+    const mealsSaved = mealsSavedAgg[0]?.total || 0;
+
+    // 2. Revenue Generated (Sum of quantity * price for sold items)
+    const revenueAgg = await SurplusItem.aggregate([
+      { $match: { currentState: "sold" } },
+      { $group: { _id: null, total: { $sum: { $multiply: ["$quantity", "$pricePerUnit"] } } } }
+    ]);
+    const revenue = revenueAgg[0]?.total || 0;
+
+    // 3. Donations Delivered (Count of items marked as donated)
+    const donations = await SurplusItem.countDocuments({ currentState: "donated" });
+
+    // 4. Active Restaurants (Count of users with role 'restaurant')
+    const restaurants = await User.countDocuments({ role: "restaurant" });
+
+    res.status(200).json({
+      success: true,
+      data: { mealsSaved, revenue, donations, restaurants }
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/*
+GET RECENT SURPLUS
+GET /api/surplus/recent
+Private
+*/
+exports.getRecentSurplus = async (req, res) => {
+  try {
+    // Fetch the 5 most recently created surplus items, populating the restaurant name
+    const recentItems = await SurplusItem.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("restaurantId", "organizationName name");
+
+    res.status(200).json({
+      success: true,
+      data: recentItems
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

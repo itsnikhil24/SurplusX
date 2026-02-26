@@ -7,6 +7,7 @@ const {
     updateStockState,
     getMySurplus
 } = require("../controllers/surplusController");
+const { getDashboardStats, getRecentSurplus } = require("../controllers/surplusController.js");
 
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
@@ -36,6 +37,9 @@ router.get(
     authorizeRoles("restaurant"),
     getMySurplus
 );
+router.get("/dashboard/stats", getDashboardStats);
+router.get("/surplus/recent", getRecentSurplus);
+
 
 
 module.exports = router;

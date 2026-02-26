@@ -13,11 +13,11 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
-     <Route path="/dashboard" element={<Dashboard />} />
-       <Route path="/uploadsurplus" element={<Upload />} />
-           <Route path="/marketplace" element={<Marketplace />} />
-           <Route path="/impactdashboard" element={<Impact/>} />
-       <Route path="/ngo-allocation" element={<NGOAllocation />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/uploadsurplus" element={<Upload />} />
+      <Route path="/marketplace" element={<Marketplace />} />
+      <Route path="/impactdashboard" element={<Impact />} />
+      <Route path="/ngo-allocation" element={<NGOAllocation />} />
     </Routes>
   )
 }

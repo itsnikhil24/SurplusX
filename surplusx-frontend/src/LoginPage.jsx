@@ -120,7 +120,7 @@ const LoginPage = () => {
 
 
         if (res.data.user.role === "restaurant")
-          navigate("/restaurant-dashboard");
+          navigate("/dashboard");
 
         else if (res.data.user.role === "ngo")
           navigate("/ngo-dashboard");
