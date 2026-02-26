@@ -57,16 +57,15 @@ export default function Dashboard() {
             {sidebarOpen && <span>Dashboard</span>}
           </a>
 
-          <a>
-            <Upload size={20} />
-            {sidebarOpen && <span>Upload Surplus</span>}
-          </a>
+          <a onClick={() => (window.location.href = "/uploadsurplus")}>
+    <Upload size={20} />
+    {sidebarOpen && <span>Upload Surplus</span>}
+  </a>
 
-          <a>
-            <Store size={20} />
-            {sidebarOpen && <span>Marketplace</span>}
-          </a>
-
+  <a onClick={() => (window.location.href = "/marketplace")}>
+    <Store size={20} />
+    {sidebarOpen && <span>Marketplace</span>}
+  </a>
           <a>
             <Users size={20} />
             {sidebarOpen && <span>NGO Allocation</span>}

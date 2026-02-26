@@ -13,11 +13,6 @@ import {
   Brain,
   ShoppingCart,
   Heart,
-  CheckCircle2,
-  Sparkles,
-  Package,
-  Clock,
-  Thermometer,
 } from "lucide-react";
 
 export default function UploadSurplus() {
@@ -29,10 +24,8 @@ export default function UploadSurplus() {
   const [step, setStep] = useState("form");
   const [form, setForm] = useState({
     item: "",
-    category: "vegetables",
     quantity: "",
     unit: "kg",
-    freshness: "fresh",
     expiry: "",
   });
   const [result, setResult] = useState(null);
@@ -46,9 +39,7 @@ export default function UploadSurplus() {
       setResult({
         sell,
         donate: 100 - sell,
-        reasoning: `Based on ${form.freshness} condition and current demand patterns, ${sell}% is optimal for marketplace sale at a 40% discount. Remaining ${100 - sell}% routed to highest-need NGO.`,
-        sellChannel: "FoodShare Marketplace — 40% discount",
-        donateNGO: "Hope Foundation — Central District",
+        reasoning: `Based on submitted surplus data, ${sell}% is optimal for marketplace sale. Remaining ${100 - sell}% routed to highest-need NGO.`,
       });
       setStep("result");
     }, 2500);
@@ -138,6 +129,7 @@ export default function UploadSurplus() {
               style={{ maxWidth: 900, marginTop: 20 }}
             >
               <div style={{ display: "grid", gap: 16 }}>
+                {/* Item Name */}
                 <input
                   required
                   placeholder="Item Name"
@@ -148,38 +140,11 @@ export default function UploadSurplus() {
                   className="secondary-btn"
                 />
 
-                <div className="stats-grid">
-                  <select
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm({ ...form, category: e.target.value })
-                    }
-                    className="secondary-btn"
-                  >
-                    <option value="vegetables">Vegetables</option>
-                    <option value="fruits">Fruits</option>
-                    <option value="dairy">Dairy</option>
-                    <option value="bakery">Bakery</option>
-                    <option value="prepared">Prepared Meals</option>
-                  </select>
-
-                  <select
-                    value={form.freshness}
-                    onChange={(e) =>
-                      setForm({ ...form, freshness: e.target.value })
-                    }
-                    className="secondary-btn"
-                  >
-                    <option value="fresh">Fresh (Today)</option>
-                    <option value="good">Good (1-2 days)</option>
-                    <option value="fair">Fair (3-4 days)</option>
-                    <option value="expiring">Expiring Soon</option>
-                  </select>
-                </div>
-
+                {/* Quantity + Unit */}
                 <div className="stats-grid">
                   <input
                     type="number"
+                    required
                     placeholder="Quantity"
                     value={form.quantity}
                     onChange={(e) =>
@@ -195,13 +160,13 @@ export default function UploadSurplus() {
                     }
                     className="secondary-btn"
                   >
-                    <option value="kg">Kilograms</option>
-                    <option value="units">Units</option>
-                    <option value="liters">Liters</option>
-                    <option value="meals">Meals</option>
+                    <option value="kg">kg</option>
+                    <option value="pcs">pcs</option>
+                    <option value="litre">litre</option>
                   </select>
                 </div>
 
+                {/* Expiry */}
                 <input
                   type="date"
                   value={form.expiry}
