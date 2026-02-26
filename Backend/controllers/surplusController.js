@@ -36,6 +36,14 @@ exports.uploadSurplus = async (req, res) => {
             coordinates
         } = req.body;
 
+        console.log( itemName,
+            quantity,
+            unit,
+            expiryDate,
+            pricePerUnit,
+            restaurantLocation,
+            coordinates);
+
         if (!itemName || !quantity || !expiryDate || !pricePerUnit) {
             return res.status(400).json({
                 message: "Please provide all required fields"
