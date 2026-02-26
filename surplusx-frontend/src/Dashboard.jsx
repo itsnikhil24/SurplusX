@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./styles/Dashboard.css";
+import "./styles/Dashboard.css"; // Ensure you include the fs- CSS classes here
 import {
-  Menu,
   Package,
   TrendingUp,
   Heart,
@@ -13,6 +12,9 @@ import {
   Users,
   BarChart3,
   LogOut,
+  Leaf,
+  Map,
+  Columns
 } from "lucide-react";
 
 // Helper function to format MongoDB dates into "2 hours ago"
@@ -34,10 +36,6 @@ const timeAgo = (dateString) => {
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const [sidebarOpen, setSidebarOpen] = useState(
-    typeof window !== "undefined" ? window.innerWidth > 768 : true
-  );
-
   const fullText = "Welcome to SurplusX 👋";
   const [typedText, setTypedText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -50,15 +48,6 @@ export default function Dashboard() {
     restaurants: 0,
   });
   const [recentSurplus, setRecentSurplus] = useState([]);
-
-  // Responsive sidebar
-  useEffect(() => {
-    const handleResize = () => {
-      setSidebarOpen(window.innerWidth > 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Typewriter effect
   useEffect(() => {
@@ -75,7 +64,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Retrieve your auth token (adjust this based on how you store it)
         const token = localStorage.getItem("token"); 
         const headers = {
           "Content-Type": "application/json",
@@ -108,131 +96,144 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="dashboard-container">
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
-      )}
+    <div className="fs-layout">
 
       {/* ===== Sidebar ===== */}
-      <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
-        <div className="sidebar-header">
-          <div className="logo">🍽️ {sidebarOpen && "SurplusX"}</div>
+      <aside className="fs-sidebar">
+        <div className="fs-brand">
+          <div className="fs-logo-icon">
+            <Leaf size={20} color="#68d391" />
+          </div>
+          <div className="fs-brand-text">
+            <h2>FoodShare AI</h2>
+            <p>Restaurant Portal</p>
+          </div>
         </div>
 
-        <nav className="sidebar-menu">
-          <Link to="/dashboard" className="active">
-            <LayoutDashboard size={20} />
-            {sidebarOpen && <span>Dashboard</span>}
+        <div className="fs-nav-group">
+          <div className="fs-nav-label">NAVIGATION</div>
+
+          <Link to="/dashboard" className="fs-nav-item active">
+            <LayoutDashboard size={18} /> Dashboard
           </Link>
 
-          <Link to="/uploadsurplus">
-            <Upload size={20} />
-            {sidebarOpen && <span>Upload Surplus</span>}
+          <Link to="/uploadsurplus" className="fs-nav-item">
+            <Upload size={18} /> Upload Surplus
           </Link>
 
-          <Link to="/marketplace">
-            <Store size={20} />
-            {sidebarOpen && <span>Marketplace</span>}
+          <Link to="/marketplace" className="fs-nav-item">
+            <Store size={18} /> Marketplace
           </Link>
 
-          <Link to="/ngo-allocation">
-            <Users size={20} />
-            {sidebarOpen && <span>NGO Allocation</span>}
+          <Link to="/ngo-allocation" className="fs-nav-item">
+            <Heart size={18} /> NGO Allocation
           </Link>
 
-          <Link to="/impactdashboard">
-            <BarChart3 size={20} />
-            {sidebarOpen && <span>Impact Dashboard</span>}
+          <Link to="/impactdashboard" className="fs-nav-item">
+            <BarChart3 size={18} /> Impact Dashboard
           </Link>
-        </nav>
 
-        <div className="logout" onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/");
-        }}>
-          <LogOut size={20} />
-          {sidebarOpen && <span>Logout</span>}
+          <Link to="/hunger-map" className="fs-nav-item">
+            <Map size={18} /> Hunger Map
+          </Link>
+        </div>
+
+        <div className="fs-sidebar-bottom">
+          <div 
+            className="fs-nav-item" 
+            style={{ cursor: "pointer" }} 
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/");
+            }}
+          >
+            <LogOut size={18} /> Logout
+          </div>
         </div>
       </aside>
 
       {/* ===== Main ===== */}
-      <main className="main-content">
-        <div className="topbar">
-          <button className="menu-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <Menu size={24} />
-          </button>
-        </div>
+      <main className="fs-main">
+        {/* Topbar */}
+        <header className="fs-topbar">
+          <div className="fs-breadcrumb">
+            <Columns size={16} color="#64748b" />
+            <span>FoodShare AI</span>
+          </div>
+        </header>
 
-        <div className="welcome">
-          <h1 className="typewriter">{typedText}</h1>
-          <p>Optimizing Profit, Minimizing Hunger</p>
-        </div>
-
-        {/* Stats */}
-        <div className="stats-grid">
-          <div className="stat-card glass">
-            <Package />
-            <h2>{loading ? "..." : stats.mealsSaved.toLocaleString()}</h2>
-            <span>Meals Saved (kg)</span>
+        {/* Dashboard Content */}
+        <div className="fs-content">
+          <div className="welcome">
+            <h1 className="typewriter">{typedText}</h1>
+            <p style={{ color: "var(--fs-text-muted)", marginBottom: "32px", fontWeight: "500" }}>
+              Optimizing Profit, Minimizing Hunger
+            </p>
           </div>
 
-          <div className="stat-card glass">
-            <TrendingUp />
-            {/* Formatted as Indian Rupees */}
-            <h2>{loading ? "..." : `₹${(stats.revenue / 100000).toFixed(1)}L`}</h2>
-            <span>Revenue Generated</span>
+          {/* Stats */}
+          <div className="stats-grid">
+            <div className="stat-card glass">
+              <Package />
+              <h2>{loading ? "..." : stats.mealsSaved.toLocaleString()}</h2>
+              <span>Meals Saved (kg)</span>
+            </div>
+
+            <div className="stat-card glass">
+              <TrendingUp />
+              <h2>{loading ? "..." : `₹${(stats.revenue / 100000).toFixed(1)}L`}</h2>
+              <span>Revenue Generated</span>
+            </div>
+
+            <div className="stat-card glass">
+              <Heart />
+              <h2>{loading ? "..." : stats.donations.toLocaleString()}</h2>
+              <span>Donations Delivered</span>
+            </div>
+
+            <div className="stat-card glass">
+              <Truck />
+              <h2>{loading ? "..." : stats.restaurants}</h2>
+              <span>Active Restaurants</span>
+            </div>
           </div>
 
-          <div className="stat-card glass">
-            <Heart />
-            <h2>{loading ? "..." : stats.donations.toLocaleString()}</h2>
-            <span>Donations Delivered</span>
-          </div>
+          {/* Bottom */}
+          <div className="bottom-grid">
+            <div className="quick-card glass">
+              <h3>Quick Actions</h3>
+              <button className="primary-btn" onClick={() => navigate("/uploadsurplus")}>
+                Upload Surplus →
+              </button>
+              <button className="secondary-btn" onClick={() => navigate("/marketplace")}>
+                View Marketplace →
+              </button>
+              <button className="secondary-btn" onClick={() => navigate("/impactdashboard")}>
+                Impact Report →
+              </button>
+            </div>
 
-          <div className="stat-card glass">
-            <Truck />
-            <h2>{loading ? "..." : stats.restaurants}</h2>
-            <span>Active Restaurants</span>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="bottom-grid">
-          <div className="quick-card glass">
-            <h3>Quick Actions</h3>
-            <button className="primary-btn" onClick={() => navigate("/uploadsurplus")}>
-              Upload Surplus →
-            </button>
-            <button className="secondary-btn" onClick={() => navigate("/marketplace")}>
-              View Marketplace →
-            </button>
-            <button className="secondary-btn" onClick={() => navigate("/impactdashboard")}>
-              Impact Report →
-            </button>
-          </div>
-
-          <div className="recent-card glass">
-            <h3>Recent Surplus</h3>
-            
-            {loading ? (
-              <p>Loading recent items...</p>
-            ) : recentSurplus.length === 0 ? (
-              <p>No recent surplus available.</p>
-            ) : (
-              recentSurplus.map((item) => (
-                <div className="recent-item" key={item._id}>
-                  <div>
-                    <b>{item.itemName} ({item.quantity}{item.unit})</b>
-                    {/* Assuming we populate the restaurant name, otherwise fallback */}
-                    <p>{item.restaurantId?.organizationName || "Restaurant"} • {timeAgo(item.createdAt)}</p>
+            <div className="recent-card glass">
+              <h3>Recent Surplus</h3>
+              
+              {loading ? (
+                <p>Loading recent items...</p>
+              ) : recentSurplus.length === 0 ? (
+                <p>No recent surplus available.</p>
+              ) : (
+                recentSurplus.map((item) => (
+                  <div className="recent-item" key={item._id}>
+                    <div>
+                      <b>{item.itemName} ({item.quantity}{item.unit})</b>
+                      <p>{item.restaurantId?.organizationName || "Restaurant"} • {timeAgo(item.createdAt)}</p>
+                    </div>
+                    <span className={`badge ${item.decision === "sell" ? "sell" : "donate"}`}>
+                      {item.decision ? item.decision.charAt(0).toUpperCase() + item.decision.slice(1) : "Pending"}
+                    </span>
                   </div>
-                  <span className={`badge ${item.decision === "sell" ? "sell" : "donate"}`}>
-                    {item.decision ? item.decision.charAt(0).toUpperCase() + item.decision.slice(1) : "Pending"}
-                  </span>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>

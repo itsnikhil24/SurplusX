@@ -1,237 +1,206 @@
-import React, { useEffect, useState } from "react";
-import "../src/styles/Dashboard.css";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
-  Menu,
-  ShoppingBag,
-  Clock,
-  MapPin,
   LayoutDashboard,
   Upload,
   Store,
-  Users,
+  Heart,
   BarChart3,
   Map,
   LogOut,
+  Leaf,
+  Columns,
+  Clock,
+  MapPin,
+  ShoppingBag
 } from "lucide-react";
+import "./styles/Marketplace.css"; // Ensure this matches your file path
 
 export default function Marketplace() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const API_BASE = "http://localhost:3000/api/surplus"; // Adjust port if needed
+  const token = localStorage.getItem("token") || "";
+
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [buyingId, setBuyingId] = useState(null);
 
-  // ✅ NEW — toast state
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-  });
+  // Fetch Marketplace Items
+  const fetchMarketplaceItems = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_BASE}/marketplace`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (res.data && res.data.success) {
+        setItems(res.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch marketplace items:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // 🔥 EASY BACKEND INTEGRATION
   useEffect(() => {
-    setItems([
-      {
-        id: 1,
-        name: "Veg Biryani",
-        restaurant: "Spice Garden",
-        expiresIn: "2 hrs",
-        quantity: "12 plates",
-        price: "₹120",
-      },
-      {
-        id: 2,
-        name: "Paneer Tikka",
-        restaurant: "Tandoor House",
-        expiresIn: "1 hr",
-        quantity: "8 plates",
-        price: "₹150",
-      },
-      {
-        id: 3,
-        name: "Mixed Veg",
-        restaurant: "Green Bowl",
-        expiresIn: "3 hrs",
-        quantity: "15 plates",
-        price: "₹90",
-      },
-    ]);
+    fetchMarketplaceItems();
   }, []);
 
-  // ✅ UPDATED — toast instead of alert
-  const handleBuy = (item) => {
-    setToast({
-      show: true,
-      message: `Order for ${item.name} placed successfully`,
-    });
+  // Handle Buy Now
+  const handleBuyNow = async (itemId) => {
+    if (!token) {
+      alert("Please login to purchase items.");
+      return;
+    }
 
-    setTimeout(() => {
-      setToast({ show: false, message: "" });
-    }, 3000);
+    try {
+      setBuyingId(itemId);
+      await axios.post(`${API_BASE}/buy/${itemId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      alert("Purchase successful!");
+      // Refresh the marketplace list so the bought item disappears
+      fetchMarketplaceItems();
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to purchase item.");
+    } finally {
+      setBuyingId(null);
+    }
+  };
+
+  // Helper to calculate hours remaining
+  const getHoursRemaining = (expiryDate) => {
+    const hours = Math.round((new Date(expiryDate) - new Date()) / (1000 * 60 * 60));
+    return hours > 0 ? hours : 0;
   };
 
   return (
-    <div className="dashboard">
+    <div className="fs-layout">
       {/* ===== Sidebar ===== */}
-      <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
-        <div className="sidebar-header">
-          <div className="logo">🍽️ {sidebarOpen && "SurplusX"}</div>
+      <aside className="fs-sidebar">
+        <div className="fs-brand">
+          <div className="fs-logo-icon">
+            <Leaf size={20} color="#68d391" />
+          </div>
+          <div className="fs-brand-text">
+            <h2>SurplusX</h2>
+            <p>Restaurant Portal</p>
+          </div>
         </div>
 
-        <nav className="sidebar-menu">
-          <a onClick={() => (window.location.href = "/dashboard")}>
-            <LayoutDashboard size={20} />
-            {sidebarOpen && <span>Dashboard</span>}
+        <div className="fs-nav-group">
+          <div className="fs-nav-label">NAVIGATION</div>
+
+          <a href="/dashboard" className="fs-nav-item">
+            <LayoutDashboard size={18} /> Dashboard
           </a>
 
-          <a onClick={() => (window.location.href = "/upload")}>
-            <Upload size={20} />
-            {sidebarOpen && <span>Upload Surplus</span>}
+          <a href="/uploadsurplus" className="fs-nav-item">
+            <Upload size={18} /> Upload Surplus
           </a>
 
-          <a onClick={() => navigate("/marketplace")}>
-            <Store size={20} />
-            {sidebarOpen && <span>Marketplace</span>}
+          <a href="/marketplace" className="fs-nav-item active">
+            <Store size={18} /> Marketplace
           </a>
 
-          <a>
-            <Users size={20} />
-            {sidebarOpen && <span>NGO Allocation</span>}
+          <a href="/ngo-allocation" className="fs-nav-item">
+            <Heart size={18} /> NGO Allocation
           </a>
 
-          <a>
-            <BarChart3 size={20} />
-            {sidebarOpen && <span>Impact Dashboard</span>}
+          <a href="/impactdashboard" className="fs-nav-item">
+            <BarChart3 size={18} /> Impact Dashboard
           </a>
 
-      
-        </nav>
+          <a href="/hunger-map" className="fs-nav-item">
+            <Map size={18} /> Hunger Map
+          </a>
+        </div>
 
-     
-           <div className="logout" onClick={() => (window.location.href = "/")}>
-       <LogOut size={20} />
-       {sidebarOpen && <span>Logout</span>}
-     </div>
+        <div className="fs-sidebar-bottom">
+          <a href="/" className="fs-nav-item" onClick={() => localStorage.removeItem("token")}>
+            <LogOut size={18} /> Logout
+          </a>
+        </div>
       </aside>
 
-      {/* ===== Main ===== */}
-      <main className="main">
-        {/* ✅ Toast */}
-        {toast.show && (
-          <div className="toast">
-            ✅ {toast.message}
+      {/* ===== Main Content ===== */}
+      <main className="fs-main">
+        {/* Top Header Bar */}
+        <header className="fs-topbar">
+          <div className="fs-breadcrumb">
+            <Columns size={16} color="#64748b" />
+            <span>FoodShare AI</span>
           </div>
-        )}
+        </header>
 
-        {/* Topbar */}
-        <div className="topbar">
-          <button
-            className="menu-btn"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <Menu size={20} />
-          </button>
-        </div>
+        {/* Content Area */}
+        <div className="fs-content">
+          <div className="fs-page-header">
+            <h1>
+              <ShoppingBag size={24} color="#f97316" strokeWidth={2.5} />
+              Marketplace
+            </h1>
+            <p>Browse discounted surplus food from nearby restaurants.</p>
+          </div>
 
-        {/* Header */}
-        <div
-          className="welcome"
-          style={{ maxWidth: 1200, margin: "0 auto 24px auto" }}
-        >
-          <h1
-            style={{
-              color: "#0c3b2e",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <ShoppingBag size={28} />
-            Marketplace
-          </h1>
+          {/* Marketplace Grid */}
+          {loading ? (
+            <p style={{ color: "#64748b", fontSize: "1.1rem" }}>Loading available items...</p>
+          ) : items.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px", background: "#fff", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
+              <h3 style={{ color: "#475569", margin: "0 0 8px 0" }}>No items available</h3>
+              <p style={{ color: "#94a3b8", margin: 0 }}>Check back later for fresh surplus deals!</p>
+            </div>
+          ) : (
+            <div className="fs-market-grid">
+              {items.map((item) => (
+                <div key={item._id} className="fs-market-card">
+                  
+                  {/* Header (Title & Badge) */}
+                  <div className="fs-market-card-header">
+                    <div>
+                      <h3 className="fs-market-title">{item.itemName}</h3>
+                      <p className="fs-market-restaurant">
+                        {item.restaurantId?.organizationName || item.restaurantId?.name || "Unknown Restaurant"}
+                      </p>
+                    </div>
+                    {/* Defaulting to 'Surplus' badge since Category isn't strictly in the schema */}
+                    <span className="fs-market-badge">Surplus</span>
+                  </div>
 
-          <p style={{ color: "#3a6b5a" }}>
-            Browse discounted surplus food from nearby restaurants.
-          </p>
-        </div>
+                  {/* Details (Time & Quantity) */}
+                  <div className="fs-market-details">
+                    <div className="fs-detail-row">
+                      <Clock size={16} color="#94a3b8" />
+                      <span>Expires in {getHoursRemaining(item.expiryDate)} hours</span>
+                    </div>
+                    <div className="fs-detail-row">
+                      <MapPin size={16} color="#94a3b8" />
+                      <span>{item.quantity} {item.unit} available</span>
+                    </div>
+                  </div>
 
-        {/* ===== GRID ===== */}
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 20,
-          }}
-        >
-          {items.map((item, i) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="stat-card glass"
-            >
-              <div style={{ marginBottom: 10 }}>
-                <h3 style={{ color: "#0c3b2e", fontWeight: 600 }}>
-                  {item.name}
-                </h3>
-                <p style={{ color: "#4f7d6b", fontSize: 13 }}>
-                  {item.restaurant}
-                </p>
-              </div>
+                  {/* Footer (Price & Button) */}
+                  <div className="fs-market-footer">
+                    <div className="fs-market-price">
+                      {item.pricePerUnit ? `₹${item.pricePerUnit}/${item.unit}` : "Free"}
+                    </div>
+                    <button 
+                      className="fs-btn-buy" 
+                      onClick={() => handleBuyNow(item._id)}
+                      disabled={buyingId === item._id}
+                      style={{ opacity: buyingId === item._id ? 0.7 : 1, cursor: buyingId === item._id ? "not-allowed" : "pointer" }}
+                    >
+                      {buyingId === item._id ? "Processing..." : "Buy Now"}
+                    </button>
+                  </div>
 
-              <div style={{ marginBottom: 16 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 6,
-                    alignItems: "center",
-                    color: "#4f7d6b",
-                    fontSize: 13,
-                  }}
-                >
-                  <Clock size={14} /> Expires in {item.expiresIn}
                 </div>
+              ))}
+            </div>
+          )}
 
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 6,
-                    alignItems: "center",
-                    color: "#4f7d6b",
-                    fontSize: 13,
-                    marginTop: 4,
-                  }}
-                >
-                  <MapPin size={14} /> {item.quantity} available
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 700,
-                    fontSize: 18,
-                    color: "#0c3b2e",
-                  }}
-                >
-                  {item.price}
-                </span>
-
-                <button
-                  className="primary-btn"
-                  onClick={() => handleBuy(item)}
-                >
-                  Buy Now
-                </button>
-              </div>
-            </motion.div>
-          ))}
         </div>
       </main>
     </div>
