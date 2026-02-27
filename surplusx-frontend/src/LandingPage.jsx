@@ -58,7 +58,7 @@ const LandingPage = ({ handleLoginOpen }) => {
       {/* Navbar */}
       <nav className="navbar">
         <div className="nav-left">
-          <span className="logo">🍽️ SurplusX</span>
+          <span className="logo">SurplusX</span>
         </div>
         <div className="nav-center">
           <a href="#how">How It Works</a>

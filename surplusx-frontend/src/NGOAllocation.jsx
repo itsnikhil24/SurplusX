@@ -141,7 +141,7 @@ const NgoAllocationPage = () => {
         <header className="fs-topbar">
           <div className="fs-breadcrumb">
             <Columns size={16} color="#64748b" />
-            <span>FoodShare AI</span>
+            <span>SurplusX</span>
           </div>
         </header>
 

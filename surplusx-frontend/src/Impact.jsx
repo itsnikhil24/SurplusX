@@ -43,7 +43,7 @@ export default function ImpactDashboard() {
             <Leaf size={20} color="#68d391" />
           </div>
           <div className="fs-brand-text">
-            <h2>FoodShare AI</h2>
+            <h2>SurplusX</h2>
             <p>Restaurant Portal</p>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function ImpactDashboard() {
         <header className="fs-topbar">
           <div className="fs-breadcrumb">
             <Columns size={16} color="#64748b" />
-            <span>FoodShare AI</span>
+            <span>SurplusX</span>
           </div>
         </header>
 
