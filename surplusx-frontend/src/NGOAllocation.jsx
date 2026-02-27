@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast"; // <-- Added import
+import toast, { Toaster } from "react-hot-toast";
 import {
   Heart,
   MapPin,
@@ -16,18 +16,18 @@ import {
   LogOut,
   Leaf,
   Columns,
-  Loader // <-- Added for loading spinner
+  Loader
 } from "lucide-react";
 
-import "./styles/NgoAllocation.css"; 
+import "./styles/NgoAllocation.css";
 
 const NgoAllocationPage = () => {
   const [ngos, setNgos] = useState([]);
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [allocatingId, setAllocatingId] = useState(null); // <-- Added state to track which item is being allocated
+  const [allocatingId, setAllocatingId] = useState(null);
 
-  const API = "http://localhost:3000/api"; 
+  const API = "http://localhost:3000/api";
 
   // Authorization Header
   const getAuthHeader = () => {
@@ -48,16 +48,13 @@ const NgoAllocationPage = () => {
       setLoading(true);
       const config = getAuthHeader();
 
-      // Fetch NGO Requests
       const ngoRes = await axios.get(API + "/ngo/requests", config);
-      // Fetch Surplus Items
       const surplusRes = await axios.get(API + "/surplus/my-items", config);
 
       const ngoArray = ngoRes.data.data || [];
       const surplusArray = surplusRes.data.data || [];
 
-      // NGO Mapping
-      const mappedNGOs = ngoArray.map(req => ({
+      const mappedNGOs = ngoArray.map((req) => ({
         id: req._id,
         name: req.ngoName || "NGO",
         locationText: req.location,
@@ -67,8 +64,7 @@ const NgoAllocationPage = () => {
 
       setNgos(mappedNGOs);
 
-      // Status Mapping based on allocationStatus
-      const mappedSurplus = surplusArray.map(item => {
+      const mappedSurplus = surplusArray.map((item) => {
         let status = "pending";
         if (item.allocationStatus === "assigned") status = "assigned";
         else if (item.allocationStatus === "delivered") status = "delivered";
@@ -86,30 +82,45 @@ const NgoAllocationPage = () => {
       setDonations(mappedSurplus);
     } catch (error) {
       console.log("API ERROR:", error);
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
   };
 
-  // Smart Allocation Button
+  // Smart Allocation Button — now enforces a visible wait (2.5s) and shows toast + spinner
   const handleSmartAllocate = async (itemId) => {
-    setAllocatingId(itemId); // <-- Set the ID of the item currently being allocated to trigger skeleton
-    
+    setAllocatingId(itemId);
+
+    // Use this toast id to update the same toast later
+    let toastId = null;
+
     try {
       const config = getAuthHeader();
-      await axios.post(
-        API + "/allocation/smart-allocate",
-        { surplusId: itemId },
-        config
-      );
-      
+
+      // show loading toast
+      toastId = toast.loading("Smart allocation in progress...");
+
+      // start API call and a delay in parallel — ensures UI shows allocating for at least 2.5s
+      const apiPromise = axios.post(API + "/allocation/smart-allocate", { surplusId: itemId }, config);
+      const delayPromise = new Promise((res) => setTimeout(res, 2500)); // 2.5s visible wait
+
+      // wait for both to finish (if API is faster, we still wait 2.5s; if API is slower, we wait for API)
+      const [apiRes] = await Promise.all([apiPromise, delayPromise]);
+
+      // refresh data after allocation
       await fetchData();
-      toast.success("Food Allocated Successfully!"); // <-- Replaced alert with success toast
-      
+
+      // replace loading toast with success
+      toast.success("Food Allocated Successfully!", { id: toastId });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Allocation Failed"); // <-- Replaced alert with error toast
+      // replace loading toast with error
+      const msg = error?.response?.data?.message || "Allocation Failed";
+      if (toastId) toast.error(msg, { id: toastId });
+      else toast.error(msg);
     } finally {
-      setAllocatingId(null); // <-- Reset allocation state
+      // reset allocation state so skeleton/button/other UI returns to normal
+      setAllocatingId(null);
     }
   };
 
@@ -170,7 +181,7 @@ const NgoAllocationPage = () => {
           {/* NGO Requests Grid */}
           <section className="fs-section">
             <h2 className="fs-section-title">Active NGO Requests</h2>
-            
+
             <div className="fs-ngo-grid">
               {loading ? (
                 <p className="fs-loading-text">Loading NGOs...</p>
@@ -183,7 +194,7 @@ const NgoAllocationPage = () => {
                     className="fs-ngo-card"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                   >
                     <div className="fs-ngo-card-header">
                       <div className="fs-ngo-icon-bg">
@@ -221,7 +232,7 @@ const NgoAllocationPage = () => {
           {/* Donation Queue List */}
           <section className="fs-section" style={{ marginTop: "40px" }}>
             <h2 className="fs-section-title">Donation Queue</h2>
-            
+
             <div className="fs-queue-list">
               {loading ? (
                 <p className="fs-loading-text">Loading Items...</p>
@@ -229,8 +240,7 @@ const NgoAllocationPage = () => {
                 <div className="fs-empty-state">No Surplus Items in Queue</div>
               ) : (
                 donations.map((item, index) => {
-                  
-                  // <-- SKELETON STATE: Render this if the current item is being allocated
+                  // SKELETON STATE: Render this if the current item is being allocated
                   if (allocatingId === item._id) {
                     return (
                       <motion.div
@@ -242,13 +252,13 @@ const NgoAllocationPage = () => {
                       >
                         {/* Fake Icon Placeholder */}
                         <div style={{ width: "40px", height: "40px", borderRadius: "8px", backgroundColor: "#cbd5e1" }} />
-                        
+
                         {/* Fake Text Placeholder */}
                         <div style={{ flex: 1 }}>
                           <div style={{ height: "18px", width: "30%", backgroundColor: "#cbd5e1", borderRadius: "4px", marginBottom: "8px" }} />
                           <div style={{ height: "14px", width: "20%", backgroundColor: "#e2e8f0", borderRadius: "4px" }} />
                         </div>
-                        
+
                         {/* Loading Text and Spinner */}
                         <div style={{ color: "#3b82f6", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
                           <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
@@ -260,14 +270,14 @@ const NgoAllocationPage = () => {
                     );
                   }
 
-                  // <-- NORMAL STATE: Render this if the item is not currently being allocated
+                  // NORMAL STATE
                   return (
                     <motion.div
                       key={item._id}
                       className="fs-queue-item"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: index * 0.05 }}
                     >
                       <div className={`fs-queue-icon-box ${item.status === "delivered" ? "delivered" : "pending"}`}>
                         {item.status === "delivered" ? <CheckCircle size={20} /> : <Package size={20} />}
@@ -283,8 +293,25 @@ const NgoAllocationPage = () => {
                           <button
                             className="fs-btn-assign"
                             onClick={() => handleSmartAllocate(item._id)}
+                            disabled={allocatingId === item._id}
+                            style={{
+                              opacity: allocatingId === item._id ? 0.7 : 1,
+                              cursor: allocatingId === item._id ? "not-allowed" : "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px"
+                            }}
                           >
-                            Smart Assign
+                            {allocatingId === item._id ? (
+                              <>
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                                  <Loader size={16} />
+                                </motion.div>
+                                Smart Allocating...
+                              </>
+                            ) : (
+                              "Smart Assign"
+                            )}
                           </button>
                         )}
                         <span className={`fs-badge fs-badge-${item.status}`}>
