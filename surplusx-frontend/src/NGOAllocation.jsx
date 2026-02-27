@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast"; // <-- Added import
 import {
   Heart,
   MapPin,
@@ -14,17 +15,19 @@ import {
   Map,
   LogOut,
   Leaf,
-  Columns
+  Columns,
+  Loader // <-- Added for loading spinner
 } from "lucide-react";
 
-import "./styles/NgoAllocation.css"; // Ensure this matches your folder structure
+import "./styles/NgoAllocation.css"; 
 
 const NgoAllocationPage = () => {
   const [ngos, setNgos] = useState([]);
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [allocatingId, setAllocatingId] = useState(null); // <-- Added state to track which item is being allocated
 
-  const API = "http://localhost:3000/api"; // Ensure port matches your backend
+  const API = "http://localhost:3000/api"; 
 
   // Authorization Header
   const getAuthHeader = () => {
@@ -90,6 +93,8 @@ const NgoAllocationPage = () => {
 
   // Smart Allocation Button
   const handleSmartAllocate = async (itemId) => {
+    setAllocatingId(itemId); // <-- Set the ID of the item currently being allocated to trigger skeleton
+    
     try {
       const config = getAuthHeader();
       await axios.post(
@@ -97,15 +102,22 @@ const NgoAllocationPage = () => {
         { surplusId: itemId },
         config
       );
+      
       await fetchData();
-      alert("Food Allocated Successfully");
+      toast.success("Food Allocated Successfully!"); // <-- Replaced alert with success toast
+      
     } catch (error) {
-      alert(error.response?.data?.message || "Allocation Failed");
+      toast.error(error.response?.data?.message || "Allocation Failed"); // <-- Replaced alert with error toast
+    } finally {
+      setAllocatingId(null); // <-- Reset allocation state
     }
   };
 
   return (
     <div className="fs-layout">
+      {/* Toast Container */}
+      <Toaster position="top-center" reverseOrder={false} />
+
       {/* ===== Sidebar ===== */}
       <aside className="fs-sidebar">
         <div className="fs-brand">
@@ -216,38 +228,72 @@ const NgoAllocationPage = () => {
               ) : donations.length === 0 ? (
                 <div className="fs-empty-state">No Surplus Items in Queue</div>
               ) : (
-                donations.map((item, index) => (
-                  <motion.div
-                    key={item._id}
-                    className="fs-queue-item"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div className={`fs-queue-icon-box ${item.status === "delivered" ? "delivered" : "pending"}`}>
-                      {item.status === "delivered" ? <CheckCircle size={20} /> : <Package size={20} />}
-                    </div>
+                donations.map((item, index) => {
+                  
+                  // <-- SKELETON STATE: Render this if the current item is being allocated
+                  if (allocatingId === item._id) {
+                    return (
+                      <motion.div
+                        key={`skeleton-${item._id}`}
+                        className="fs-queue-item"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        style={{ display: "flex", alignItems: "center", gap: "15px", backgroundColor: "#f8fafc" }}
+                      >
+                        {/* Fake Icon Placeholder */}
+                        <div style={{ width: "40px", height: "40px", borderRadius: "8px", backgroundColor: "#cbd5e1" }} />
+                        
+                        {/* Fake Text Placeholder */}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ height: "18px", width: "30%", backgroundColor: "#cbd5e1", borderRadius: "4px", marginBottom: "8px" }} />
+                          <div style={{ height: "14px", width: "20%", backgroundColor: "#e2e8f0", borderRadius: "4px" }} />
+                        </div>
+                        
+                        {/* Loading Text and Spinner */}
+                        <div style={{ color: "#3b82f6", fontWeight: "600", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                            <Loader size={16} />
+                          </motion.div>
+                          Smartly allocating to NGO...
+                        </div>
+                      </motion.div>
+                    );
+                  }
 
-                    <div className="fs-queue-details">
-                      <h3>{item.foodName} <span className="fs-queue-qty">({item.quantity})</span></h3>
-                      <p className="fs-queue-meta">Expiry: {item.expiry}</p>
-                    </div>
+                  // <-- NORMAL STATE: Render this if the item is not currently being allocated
+                  return (
+                    <motion.div
+                      key={item._id}
+                      className="fs-queue-item"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <div className={`fs-queue-icon-box ${item.status === "delivered" ? "delivered" : "pending"}`}>
+                        {item.status === "delivered" ? <CheckCircle size={20} /> : <Package size={20} />}
+                      </div>
 
-                    <div className="fs-queue-action">
-                      {item.status === "pending" && (
-                        <button
-                          className="fs-btn-assign"
-                          onClick={() => handleSmartAllocate(item._id)}
-                        >
-                          Smart Assign
-                        </button>
-                      )}
-                      <span className={`fs-badge fs-badge-${item.status}`}>
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))
+                      <div className="fs-queue-details">
+                        <h3>{item.foodName} <span className="fs-queue-qty">({item.quantity})</span></h3>
+                        <p className="fs-queue-meta">Expiry: {item.expiry}</p>
+                      </div>
+
+                      <div className="fs-queue-action">
+                        {item.status === "pending" && (
+                          <button
+                            className="fs-btn-assign"
+                            onClick={() => handleSmartAllocate(item._id)}
+                          >
+                            Smart Assign
+                          </button>
+                        )}
+                        <span className={`fs-badge fs-badge-${item.status}`}>
+                          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </section>

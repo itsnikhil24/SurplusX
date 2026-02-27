@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast'; // <-- Added import
 import './styles/LoginPage.css';
 
 const API_URL = "http://localhost:3000/api/auth";
@@ -116,7 +117,8 @@ const LoginPage = () => {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        alert(res.data.message);
+        // <-- Replaced alert with toast
+        toast.success(res.data.message || "Logged in successfully!");
 
 
         if (res.data.user.role === "restaurant")
@@ -153,7 +155,8 @@ const LoginPage = () => {
         });
 
 
-        alert(res.data.message);
+        // <-- Replaced alert with toast
+        toast.success(res.data.message || "Registered successfully!");
 
         setIsLogin(true);
 
@@ -161,9 +164,9 @@ const LoginPage = () => {
 
     }
     catch (err) {
-
-      setError(err.response?.data?.message || "Server Error");
-
+      const errorMessage = err.response?.data?.message || "Server Error";
+      setError(errorMessage);
+      toast.error(errorMessage); // <-- Also added an error toast here for consistency
     }
     finally {
 
@@ -178,6 +181,9 @@ const LoginPage = () => {
   return (
 
     <div className="login-page">
+
+      {/* <-- Added Toaster component to render the toasts on the screen */}
+      <Toaster position="top-center" reverseOrder={false} />
 
       <motion.button
         className="back-button"

@@ -15,6 +15,8 @@ import {
   ShoppingBag
 } from "lucide-react";
 import "./styles/Marketplace.css"; // Ensure this matches your file path
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Marketplace() {
   const API_BASE = "http://localhost:3000/api/surplus"; // Adjust port if needed
@@ -31,7 +33,7 @@ export default function Marketplace() {
       const res = await axios.get(`${API_BASE}/marketplace`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (res.data && res.data.success) {
         setItems(res.data.data);
       }
@@ -49,7 +51,7 @@ export default function Marketplace() {
   // Handle Buy Now
   const handleBuyNow = async (itemId) => {
     if (!token) {
-      alert("Please login to purchase items.");
+      toast.error("Please login to purchase items.");
       return;
     }
 
@@ -58,12 +60,14 @@ export default function Marketplace() {
       await axios.post(`${API_BASE}/buy/${itemId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      alert("Purchase successful!");
+
+      toast.success("Purchase successful!");
       // Refresh the marketplace list so the bought item disappears
       fetchMarketplaceItems();
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to purchase item.");
+      toast.error(
+        error.response?.data?.message || "Failed to purchase item."
+      );
     } finally {
       setBuyingId(null);
     }
@@ -77,6 +81,9 @@ export default function Marketplace() {
 
   return (
     <div className="fs-layout">
+      {/* ===== Toast Container added here to render the toasts ===== */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
       {/* ===== Sidebar ===== */}
       <aside className="fs-sidebar">
         <div className="fs-brand">
@@ -156,7 +163,7 @@ export default function Marketplace() {
             <div className="fs-market-grid">
               {items.map((item) => (
                 <div key={item._id} className="fs-market-card">
-                  
+
                   {/* Header (Title & Badge) */}
                   <div className="fs-market-card-header">
                     <div>
@@ -186,8 +193,8 @@ export default function Marketplace() {
                     <div className="fs-market-price">
                       {item.pricePerUnit ? `₹${item.pricePerUnit}/${item.unit}` : "Free"}
                     </div>
-                    <button 
-                      className="fs-btn-buy" 
+                    <button
+                      className="fs-btn-buy"
                       onClick={() => handleBuyNow(item._id)}
                       disabled={buyingId === item._id}
                       style={{ opacity: buyingId === item._id ? 0.7 : 1, cursor: buyingId === item._id ? "not-allowed" : "pointer" }}
