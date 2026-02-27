@@ -125,10 +125,10 @@ const LoginPage = () => {
           navigate("/dashboard");
 
         else if (res.data.user.role === "ngo")
-          navigate("/ngo-dashboard");
+          navigate("/dashboard");
 
         else
-          navigate("/admin-dashboard");
+          navigate("/dashboard");
 
       }
 
