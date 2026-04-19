@@ -123,3 +123,12 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    // req.user already comes from protect middleware
+    res.status(200).json(req.user);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
