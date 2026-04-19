@@ -27,7 +27,7 @@ const NgoAllocationPage = () => {
   const [loading, setLoading] = useState(true);
   const [allocatingId, setAllocatingId] = useState(null);
 
-  const API = "http://localhost:3000/api";
+ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
   // Authorization Header
   const getAuthHeader = () => {
@@ -48,8 +48,8 @@ const NgoAllocationPage = () => {
       setLoading(true);
       const config = getAuthHeader();
 
-      const ngoRes = await axios.get(API + "/ngo/requests", config);
-      const surplusRes = await axios.get(API + "/surplus/my-items", config);
+      const ngoRes = await axios.get(API_BASE + "/ngo/requests", config);
+      const surplusRes = await axios.get(API_BASE + "/surplus/my-items", config);
 
       const ngoArray = ngoRes.data.data || [];
       const surplusArray = surplusRes.data.data || [];
@@ -102,7 +102,7 @@ const NgoAllocationPage = () => {
       toastId = toast.loading("Smart allocation in progress...");
 
       // start API call and a delay in parallel — ensures UI shows allocating for at least 2.5s
-      const apiPromise = axios.post(API + "/allocation/smart-allocate", { surplusId: itemId }, config);
+      const apiPromise = axios.post(API_BASE + "/allocation/smart-allocate", { surplusId: itemId }, config);
       const delayPromise = new Promise((res) => setTimeout(res, 2500)); // 2.5s visible wait
 
       // wait for both to finish (if API is faster, we still wait 2.5s; if API is slower, we wait for API)

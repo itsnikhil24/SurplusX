@@ -8,18 +8,52 @@ import Marketplace from '../src/Marketplace.jsx'
 import Impact from '../src/Impact.jsx'
 import NGOAllocation from './NGOAllocation.jsx'
 import HungerMap from './HungerMap.jsx'
+import ProtectedRoute from './routes/ProtectedRoute.jsx'
 import "leaflet/dist/leaflet.css";
+
 export default function App() {
   return (
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/uploadsurplus" element={<Upload />} />
-      <Route path="/marketplace" element={<Marketplace />} />
-      <Route path="/impactdashboard" element={<Impact />} />
-      <Route path="/ngo-allocation" element={<NGOAllocation />} />
-      <Route path="/hunger-map" element={<HungerMap />} />
+
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/uploadsurplus" element={
+        <ProtectedRoute>
+          <Upload />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/marketplace" element={
+        <ProtectedRoute>
+          <Marketplace />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/impactdashboard" element={
+        <ProtectedRoute>
+          <Impact />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/ngo-allocation" element={
+        <ProtectedRoute>
+          <NGOAllocation />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/hunger-map" element={
+        <ProtectedRoute>
+          <HungerMap />
+        </ProtectedRoute>
+      } />
     </Routes>
   )
 }

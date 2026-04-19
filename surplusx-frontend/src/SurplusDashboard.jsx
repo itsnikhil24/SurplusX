@@ -18,7 +18,7 @@ import {
 import "./styles/SurplusDashboard.css";
 
 export default function UploadSurplus() {
-  const API_BASE = "http://localhost:3000/api/surplus"; // Adjust port if needed
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token") || "";
 
   // UI States
@@ -115,7 +115,7 @@ export default function UploadSurplus() {
         payload.coordinates = undefined;
       }
 
-      const res = await axios.post(`${API_BASE}/upload`, payload, {
+      const res = await axios.post(`${API_BASE}/surplus/upload`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

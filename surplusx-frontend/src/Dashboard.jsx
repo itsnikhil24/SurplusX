@@ -16,6 +16,7 @@ import {
   Map,
   Columns
 } from "lucide-react";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // Helper function to format MongoDB dates into "2 hours ago"
 const timeAgo = (dateString) => {
@@ -62,38 +63,46 @@ export default function Dashboard() {
 
   // 🔥 FETCH REAL DATA FROM BACKEND
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const token = localStorage.getItem("token"); 
-        const headers = {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        };
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        // Fetch Stats
-        const statsRes = await fetch("http://localhost:3000/api/surplus/dashboard/stats", { headers });
-        const statsData = await statsRes.json();
-        
-        if (statsData.success) {
-          setStats(statsData.data);
-        }
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
 
-        // Fetch Recent Surplus
-        const recentRes = await fetch("http://localhost:3000/api/surplus/surplus/recent", { headers });
-        const recentData = await recentRes.json();
-        
-        if (recentData.success) {
-          setRecentSurplus(recentData.data);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
+      // ✅ Fetch Stats
+      const statsRes = await fetch(`${API_BASE}/surplus/dashboard/stats`, {
+        headers
+      });
+
+      const statsData = await statsRes.json();
+
+      if (statsData.success) {
+        setStats(statsData.data);
       }
-    };
 
-    fetchDashboardData();
-  }, []);
+      // ✅ Fetch Recent Surplus
+      const recentRes = await fetch(`${API_BASE}/surplus/surplus/recent`, {
+        headers
+      });
+
+      const recentData = await recentRes.json();
+
+      if (recentData.success) {
+        setRecentSurplus(recentData.data);
+      }
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
 
   return (
     <div className="fs-layout">

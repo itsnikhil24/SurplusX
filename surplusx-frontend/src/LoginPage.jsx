@@ -11,14 +11,17 @@ import {
 } from 'lucide-react';
 
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast'; // <-- Added import
+import toast, { Toaster } from 'react-hot-toast';
 import './styles/LoginPage.css';
+import { useAuth } from "./context/AuthContext"
 
-const API_URL = "http://localhost:3000/api/auth";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const API_URL = `${API_BASE}/auth`;
 
 const LoginPage = () => {
 
   const navigate = useNavigate();
+  const { login } = useAuth(); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
@@ -39,65 +42,37 @@ const LoginPage = () => {
     }
   });
 
-
-  /* ================= GET LOCATION ================= */
-
   const getLocation = () => {
-
     return new Promise((resolve) => {
-
       if (!navigator.geolocation) {
         resolve({ lat: "", lng: "" });
         return;
       }
 
       navigator.geolocation.getCurrentPosition(
-
         (position) => {
-
           resolve({
             lat: position.coords.latitude.toString(),
             lng: position.coords.longitude.toString()
           });
-
         },
-
-        () => {
-
-          resolve({
-            lat: "",
-            lng: ""
-          });
-
-        }
-
+        () => resolve({ lat: "", lng: "" })
       );
-
     });
-
   };
 
-
-  /* ================= INPUT CHANGE ================= */
-
   const handleChange = (e) => {
-
     const { name, value } = e.target;
 
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-
   };
-
-
-  /* ================= SUBMIT ================= */
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
-
     setLoading(true);
     setError("");
 
@@ -105,44 +80,24 @@ const LoginPage = () => {
 
       if (isLogin) {
 
-        /* LOGIN */
-
         const res = await axios.post(`${API_URL}/login`, {
-
           email: formData.email,
           password: formData.password
-
         });
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        // ✅ FIX: use context login (not localStorage directly)
+        await login(res.data.token);
 
-        // <-- Replaced alert with toast
         toast.success(res.data.message || "Logged in successfully!");
 
+        // ✅ redirect AFTER auth sync
+        navigate("/dashboard");
 
-        if (res.data.user.role === "restaurant")
-          navigate("/dashboard");
-
-        else if (res.data.user.role === "ngo")
-          navigate("/dashboard");
-
-        else
-          navigate("/dashboard");
-
-      }
-
-      else {
-
-        /* FETCH LOCATION AUTOMATICALLY */
+      } else {
 
         const location = await getLocation();
 
-
-        /* REGISTER */
-
         const res = await axios.post(`${API_URL}/register`, {
-
           name: formData.name,
           email: formData.email,
           password: formData.password,
@@ -150,62 +105,41 @@ const LoginPage = () => {
           phone: formData.phone,
           organizationName: formData.organizationName,
           address: formData.address,
-          location: location
-
+          location
         });
 
-
-        // <-- Replaced alert with toast
         toast.success(res.data.message || "Registered successfully!");
-
         setIsLogin(true);
-
       }
 
-    }
-    catch (err) {
+    } catch (err) {
+
       const errorMessage = err.response?.data?.message || "Server Error";
       setError(errorMessage);
-      toast.error(errorMessage); // <-- Also added an error toast here for consistency
-    }
-    finally {
+      toast.error(errorMessage);
 
+    } finally {
       setLoading(false);
-
     }
-
   };
 
-
-
   return (
-
     <div className="login-page">
 
-      {/* <-- Added Toaster component to render the toasts on the screen */}
       <Toaster position="top-center" reverseOrder={false} />
 
       <motion.button
         className="back-button"
         onClick={() => navigate("/")}
-
       >
-
         <ArrowLeft size={20} /> Back
-
       </motion.button>
-
-
 
       <div className="login-container">
 
-
         {/* LEFT */}
-
         <div className="login-left">
-
           <div className="login-brand">
-
             <div className="brand-logo">
               <Sparkles size={40} />
             </div>
@@ -217,43 +151,27 @@ const LoginPage = () => {
             <p className="brand-tagline">
               Optimising Profit Minimising Hunger
             </p>
-
           </div>
-
         </div>
 
-
-
         {/* RIGHT */}
-
         <div className="login-right">
-
           <div className="login-card">
-
 
             <h2 className="login-title">
               {isLogin ? "Login" : "Register"}
             </h2>
 
-
             {error && (
               <p className="error-msg">{error}</p>
             )}
 
-
-
             <form onSubmit={handleSubmit} className="login-form">
 
-
-              {/* REGISTER FIELDS */}
-
               {!isLogin && (
-
                 <>
-
                   <div className="form-group">
                     <label>Name</label>
-
                     <input
                       type="text"
                       name="name"
@@ -262,89 +180,57 @@ const LoginPage = () => {
                       onChange={handleChange}
                       required
                     />
-
                   </div>
 
-
                   <div className="form-group">
-
                     <label>Role</label>
-
                     <select
                       name="role"
                       value={formData.role}
                       onChange={handleChange}
                     >
-
                       <option value="restaurant">Restaurant</option>
                       <option value="ngo">NGO</option>
                       <option value="admin">Admin</option>
-
                     </select>
-
                   </div>
 
-
                   <div className="form-group">
-
                     <label>Phone</label>
-
                     <input
                       type="text"
                       name="phone"
-                      placeholder="Enter phone number"
                       value={formData.phone}
                       onChange={handleChange}
                     />
-
                   </div>
 
-
                   <div className="form-group">
-
                     <label>Organization Name</label>
-
                     <input
                       type="text"
                       name="organizationName"
-                      placeholder="Enter organization name"
                       value={formData.organizationName}
                       onChange={handleChange}
                     />
-
                   </div>
 
-
                   <div className="form-group">
-
                     <label>Address</label>
-
                     <input
                       type="text"
                       name="address"
-                      placeholder="Enter address"
                       value={formData.address}
                       onChange={handleChange}
                     />
-
                   </div>
-
                 </>
-
               )}
 
-
-
-              {/* EMAIL */}
-
               <div className="form-group">
-
                 <label>Email</label>
-
                 <div className="input-wrapper">
-
                   <Mail className="input-icon" />
-
                   <input
                     type="email"
                     name="email"
@@ -353,23 +239,13 @@ const LoginPage = () => {
                     onChange={handleChange}
                     required
                   />
-
                 </div>
-
               </div>
 
-
-
-              {/* PASSWORD */}
-
               <div className="form-group">
-
                 <label>Password</label>
-
                 <div className="input-wrapper">
-
                   <Lock className="input-icon" />
-
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
@@ -378,77 +254,45 @@ const LoginPage = () => {
                     onChange={handleChange}
                     required
                   />
-
                   <button
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-
                     {showPassword ? <EyeOff /> : <Eye />}
-
                   </button>
-
                 </div>
-
               </div>
-
-
 
               <button
                 className="submit-btn"
                 type="submit"
                 disabled={loading}
               >
-
-                {loading ?
-                  "Please Wait..."
-                  :
-                  isLogin ? "Login" : "Register"
-                }
-
+                {loading ? "Please Wait..." : isLogin ? "Login" : "Register"}
               </button>
-
 
             </form>
 
-
-
             <div className="login-footer">
-
               <p>
-
-                {isLogin ?
-                  "Don't have account?"
-                  :
-                  "Already have account?"
-                }
-
+                {isLogin ? "Don't have account?" : "Already have account?"}
                 <button
                   type="button"
                   className="toggle-btn"
                   onClick={() => setIsLogin(!isLogin)}
                 >
-
                   {isLogin ? "Register" : "Login"}
-
                 </button>
-
               </p>
-
             </div>
 
-
           </div>
-
         </div>
 
       </div>
-
     </div>
-
   );
-
 };
 
 export default LoginPage;

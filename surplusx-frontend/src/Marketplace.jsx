@@ -19,7 +19,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Marketplace() {
-  const API_BASE = "http://localhost:3000/api/surplus"; // Adjust port if needed
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token") || "";
 
   const [items, setItems] = useState([]);
@@ -30,7 +30,7 @@ export default function Marketplace() {
   const fetchMarketplaceItems = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/marketplace`, {
+      const res = await axios.get(`${API_BASE}/surplus/marketplace`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -57,7 +57,7 @@ export default function Marketplace() {
 
     try {
       setBuyingId(itemId);
-      await axios.post(`${API_BASE}/buy/${itemId}`, {}, {
+      await axios.post(`${API_BASE}/surplus/buy/${itemId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

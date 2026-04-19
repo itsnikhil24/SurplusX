@@ -27,6 +27,8 @@ import L from "leaflet";
 
 import "./styles/HungerMap.css";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 export default function HungerMap() {
 
     const [ngos, setNgos] = useState([]);
@@ -51,7 +53,7 @@ export default function HungerMap() {
             const token = localStorage.getItem("token");
 
             const res = await axios.get(
-                "http://localhost:3000/api/ngo/requests",
+                `${API_BASE}/ngo/requests`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
