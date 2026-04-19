@@ -19,7 +19,7 @@ import {
   Loader
 } from "lucide-react";
 
-import "./styles/NgoAllocation.css";
+import "./styles/NGOAllocation.css";
 
 const NgoAllocationPage = () => {
   const [ngos, setNgos] = useState([]);
